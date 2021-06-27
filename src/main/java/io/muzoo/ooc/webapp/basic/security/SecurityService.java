@@ -40,6 +40,18 @@ public class SecurityService {
         } else {
             return false;
         }
+    }
 
+    public boolean addUser(HttpServletRequest request) {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String name = request.getParameter("name");
+        if (!userService.checkIfUserExists(username)) {
+            userService.addUser(username, password, name);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }

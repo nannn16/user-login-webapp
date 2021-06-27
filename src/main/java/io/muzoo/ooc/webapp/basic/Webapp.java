@@ -7,6 +7,7 @@ import org.apache.catalina.startup.Tomcat;
 
 import javax.servlet.ServletException;
 import java.io.File;
+import java.sql.*;
 
 public class Webapp {
 
@@ -25,9 +26,7 @@ public class Webapp {
 
             tomcat.start();
             tomcat.getServer().await();
-        } catch (ServletException e) {
-            e.printStackTrace();
-        } catch (LifecycleException e) {
+        } catch (ServletException | LifecycleException e) {
             e.printStackTrace();
         }
 
