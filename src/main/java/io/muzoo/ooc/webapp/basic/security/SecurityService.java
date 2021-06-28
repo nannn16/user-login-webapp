@@ -54,4 +54,12 @@ public class SecurityService {
             return false;
         }
     }
+
+    public void removeUser(HttpServletRequest request) {
+        String username = request.getParameter("removeuser");
+        if(userService.checkIfUserExists(username)) {
+            userService.removeUser(username);
+        }
+    }
+
 }

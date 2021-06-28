@@ -10,14 +10,27 @@ public class AddUserServlet extends AbstractRoutableHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RequestDispatcher requestDispatcher = request.getRequestDispatcher("WEB-INF/adduser.jsp");
-        requestDispatcher.include(request, response);
+        if(securityService.isAuthorized(request)) {
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("WEB-INF/adduser.jsp");
+            requestDispatcher.include(request, response);
+        } else {
+            response.sendRedirect("/login");
+        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        securityService.addUser(request);
-        response.sendRedirect("/");
+        String error = "";
+        if(securityService.addUser(request)) {
+            response.sendRedirect("/");
+        }
+        else {
+            error = "Username already existed.";
+
+            request.setAttribute("error", error);
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("WEB-INF/adduser.jsp");
+            requestDispatcher.include(request, response);
+        }
     }
 
     @Override
