@@ -2,6 +2,7 @@
 <html>
 <title>Login Page</title>
 <body>
+<h2>Login</h2>
 <p>
     ${error}
 </p>

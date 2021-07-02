@@ -19,6 +19,7 @@ public class ServletRouter {
         servletClasses.add(AddUserServlet.class);
         servletClasses.add(RemoveUserServlet.class);
         servletClasses.add(ConfirmRemoveServlet.class);
+        servletClasses.add(EditUserServlet.class);
     }
 
     public void init(Context ctx) {

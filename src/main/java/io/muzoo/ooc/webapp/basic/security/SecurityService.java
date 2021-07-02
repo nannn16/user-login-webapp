@@ -2,6 +2,7 @@ package io.muzoo.ooc.webapp.basic.security;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Map;
 import java.util.Objects;
 
 public class SecurityService {
@@ -57,8 +58,19 @@ public class SecurityService {
 
     public void removeUser(HttpServletRequest request) {
         String username = request.getParameter("removeuser");
-        if(userService.checkIfUserExists(username)) {
+        String currentUser = getCurrentUsername(request);
+        if(userService.checkIfUserExists(username) && !username.equals(currentUser)) {
             userService.removeUser(username);
+        }
+    }
+
+    public void editUser(HttpServletRequest request) {
+        String userID = request.getParameter("id");
+        int id = Integer.parseInt(userID);
+        String username = request.getParameter("username");
+        String name = request.getParameter("name");
+        if(userService.checkIfUserExists(username)) {
+            userService.editUser(username, name, id);
         }
     }
 

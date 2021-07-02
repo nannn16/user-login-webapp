@@ -25,6 +25,16 @@
             <td><c:out value="${usr.name}"/></td>
             <td>
                 <c:if test="${username!=usr.username}">
+                    <form action="/edituser" method="get">
+                        <input type="hidden" name="id" value="${usr.id}">
+                        <input type="hidden" name="username" value="${usr.username}">
+                        <input type="hidden" name="name" value="${usr.name}">
+                        <button type="submit">edit user</button>
+                    </form>
+                </c:if>
+            </td>
+            <td>
+                <c:if test="${username!=usr.username}">
                     <form action="/confirmremove" method="get">
                         <input type="hidden" name="removeuser" value="${usr.username}">
                         <button type="submit">remove user</button>

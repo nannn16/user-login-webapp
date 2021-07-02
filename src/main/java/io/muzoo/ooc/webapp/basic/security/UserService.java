@@ -21,6 +21,8 @@ public class UserService {
                 users.put(rs.getString("username"),
                         new User(rs.getString("username"), rs.getString("password")));
             }
+            rs.close();
+            stmt.close();
             con.close();
 
         } catch (ClassNotFoundException | SQLException e) {
@@ -49,6 +51,7 @@ public class UserService {
             stmt.setString(3, name);
             stmt.executeUpdate();
             users.put(username, new User(username, password));
+            stmt.close();
             con.close();
         }
         catch (ClassNotFoundException | SQLException e) {
@@ -62,10 +65,30 @@ public class UserService {
             Connection con = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/ssc_2020", "ssc", "secret"
             );
-            PreparedStatement stmt = con.prepareStatement("DELETE FROM user WHERE USERNAME=?");
+            PreparedStatement stmt = con.prepareStatement("DELETE FROM user WHERE username=?");
             stmt.setString(1, username);
             stmt.executeUpdate();
             users.remove(username);
+            stmt.close();
+            con.close();
+        }
+        catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void editUser(String username, String name, int id) {
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/ssc_2020", "ssc", "secret"
+            );
+            PreparedStatement stmt = con.prepareStatement("UPDATE user SET username = ? name = ? WHERE id=?");
+            stmt.setString(1, name);
+            stmt.setString(2, username);
+            stmt.setInt(3, id);
+            stmt.executeUpdate();
+            stmt.close();
             con.close();
         }
         catch (ClassNotFoundException | SQLException e) {
