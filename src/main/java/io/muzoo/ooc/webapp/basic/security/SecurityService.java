@@ -67,10 +67,11 @@ public class SecurityService {
     public void editUser(HttpServletRequest request) {
         String userID = request.getParameter("id");
         int id = Integer.parseInt(userID);
-        String username = request.getParameter("username");
+        String oldUsername = request.getParameter("oldUsername");
+        String newUsername = request.getParameter("newUsername");
         String name = request.getParameter("name");
-        if(userService.checkIfUserExists(username)) {
-            userService.editUser(username, name, id);
+        if(userService.checkIfUserExists(oldUsername)) {
+            userService.editUser(oldUsername, newUsername, name, id);
         }
     }
 

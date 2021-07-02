@@ -77,17 +77,20 @@ public class UserService {
         }
     }
 
-    public void editUser(String username, String name, int id) {
+    public void editUser(String oldUsername, String newUsername, String name, int id) {
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/ssc_2020", "ssc", "secret"
             );
-            PreparedStatement stmt = con.prepareStatement("UPDATE user SET username = ? name = ? WHERE id=?");
-            stmt.setString(1, name);
-            stmt.setString(2, username);
+            PreparedStatement stmt = con.prepareStatement("UPDATE user SET username = ?, name = ? WHERE id=?");
+            stmt.setString(1, newUsername);
+            stmt.setString(2, name);
             stmt.setInt(3, id);
             stmt.executeUpdate();
+            User user = users.get(oldUsername);
+            users.remove(oldUsername);
+            users.put(newUsername, user);
             stmt.close();
             con.close();
         }

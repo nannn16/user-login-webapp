@@ -9,8 +9,10 @@
 <p>
 <h2>Edit User</h2>
 <form action="/edituser" method="post">
+    <input type="hidden" name="id" value="${id}">
+    <input type="hidden" name="oldUsername" value="${username}">
     <label>
-        <input type="text" name="username" value="${username}">
+        <input type="text" name="newUsername" value="${username}">
     </label><br>
     <label>
         <input type="text" name="name" value="${name}">
