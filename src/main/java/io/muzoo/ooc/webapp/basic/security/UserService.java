@@ -1,101 +1,132 @@
 package io.muzoo.ooc.webapp.basic.security;
 
+import io.muzoo.ooc.webapp.basic.model.User;
+import lombok.Setter;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class UserService {
 
-    private Map<String, User> users = new HashMap<>();
-    {
-        try{
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/ssc_2020", "ssc", "secret"
-            );
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from user");
-            while(rs.next()){
-                users.put(rs.getString("username"),
-                        new User(rs.getString("username"), rs.getString("password")));
-            }
-            rs.close();
-            stmt.close();
-            con.close();
-
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
+    private static final String INSERT_USER_SQL = "INSERT INTO user (username, password, name) VALUE (?,?,?)";
+    private static final String DELETE_USER_SQL = "DELETE FROM user WHERE username=?";
+    private static final String UPDATE_USER_SQL = "UPDATE user SET name = ? WHERE username=?";
+    private static final String SELECT_USER_SQL = "SELECT * FROM user WHERE username = ?";
+    private static final String SELECT_ALL_SQL = "SELECT * FROM user";
+    private static final String CHANGE_PASSWORD_SQL = "UPDATE user SET password = ? WHERE username=?";
+    @Setter
+    private DatabaseConnectionService databaseConnectionService;
 
     public User findByUsername(String username) {
-        return users.get(username);
+        try (Connection con = databaseConnectionService.getConnection();
+             PreparedStatement stmt = con.prepareStatement(SELECT_USER_SQL)
+        ) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return new User(rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("name"));
+
+        } catch (SQLException e) {
+            return null;
+        }
     }
 
     public boolean checkIfUserExists(String username) {
-        return users.containsKey(username);
+        try (Connection con = databaseConnectionService.getConnection();
+             PreparedStatement stmt = con.prepareStatement(SELECT_USER_SQL)
+        ) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
-    public void addUser(String username, String password, String name) {
-        try{
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/ssc_2020", "ssc", "secret"
-            );
-            PreparedStatement stmt = con.prepareStatement("insert into user (username, password, name) value (?,?,?)");
+    public void addUser(String username, String password, String name) throws UserServiceException {
+        try (Connection con = databaseConnectionService.getConnection();
+             PreparedStatement stmt = con.prepareStatement(INSERT_USER_SQL)
+        ) {
             stmt.setString(1, username);
-            stmt.setString(2, password);
+            stmt.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
             stmt.setString(3, name);
             stmt.executeUpdate();
-            users.put(username, new User(username, password));
-            stmt.close();
-            con.close();
-        }
-        catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+            con.commit();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new UserNameNotUniqueException(String.format("username %s has already been taken.", username));
+        } catch (SQLException e) {
+            throw new UserServiceException(e.getMessage());
         }
     }
 
     public void removeUser(String username) {
-        try{
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/ssc_2020", "ssc", "secret"
-            );
-            PreparedStatement stmt = con.prepareStatement("DELETE FROM user WHERE username=?");
+        try (Connection con = databaseConnectionService.getConnection();
+             PreparedStatement stmt = con.prepareStatement(DELETE_USER_SQL)
+        ) {
             stmt.setString(1, username);
             stmt.executeUpdate();
-            users.remove(username);
-            stmt.close();
-            con.close();
-        }
-        catch (ClassNotFoundException | SQLException e) {
+            con.commit();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void editUser(String oldUsername, String newUsername, String name, int id) {
-        try{
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/ssc_2020", "ssc", "secret"
-            );
-            PreparedStatement stmt = con.prepareStatement("UPDATE user SET username = ?, name = ? WHERE id=?");
-            stmt.setString(1, newUsername);
-            stmt.setString(2, name);
-            stmt.setInt(3, id);
+    public void editUser(String username, String name) throws UserServiceException {
+        try (Connection con = databaseConnectionService.getConnection();
+             PreparedStatement stmt = con.prepareStatement(UPDATE_USER_SQL)
+        ) {
+            stmt.setString(1, name);
+            stmt.setString(2, username);
             stmt.executeUpdate();
-            User user = users.get(oldUsername);
-            users.remove(oldUsername);
-            users.put(newUsername, user);
-            stmt.close();
-            con.close();
+            con.commit();
+        } catch (SQLException e) {
+            throw new UserServiceException(e.getMessage());
         }
-        catch (ClassNotFoundException | SQLException e) {
+    }
+
+    public List<User> listUsers() {
+        List<User> users = new ArrayList<>();
+        try (Connection con = databaseConnectionService.getConnection();
+             Statement stmt = con.createStatement()
+        ) {
+            ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL);
+            while (rs.next()) {
+
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("id", rs.getInt("id"));
+                map.put("username", rs.getString("username"));
+                map.put("name", rs.getString("name"));
+                users.add(new User(rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("name")));
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return users;
+    }
+
+    public void changePassword(String username, String password) throws UserServiceException {
+        try (Connection con = databaseConnectionService.getConnection();
+             PreparedStatement stmt = con.prepareStatement(CHANGE_PASSWORD_SQL)
+        ) {
+            stmt.setString(1, BCrypt.hashpw(password, BCrypt.gensalt()));
+            stmt.setString(2, username);
+            stmt.executeUpdate();
+            con.commit();
+        } catch (SQLException e) {
+            throw new UserServiceException(e.getMessage());
         }
     }
 }

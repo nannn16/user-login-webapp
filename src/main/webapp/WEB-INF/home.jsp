@@ -2,47 +2,62 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <html>
-<title>Home Page</title>
-<body>
-<h2>
-    Hello ${username}
-    <form action="/logout" method="get">
-        <button type="submit">Logout</button>
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<div class="container mt-4">
+    <body>
+    <h2 class="my-4" style="display: inline;">
+        Hello ${username}
+    </h2>
+    <form style="display: inline;" action="/user/password" method="get">
+        <input type="hidden" name="username" value="${username}">
+        <button class="btn btn-primary btn-sm" type="submit"><i class="fa fa-key"></i> &nbsp; Change Password</button>
     </form>
-</h2>
-<form action="/adduser" method="get">
-    <button type="submit">add user</button>
-</form>
-<table>
-    <tr>
-        <th>Username</th>
-        <th>Name</th>
-    </tr>
+    <form style="display: inline;" action="/logout" method="get">
+        <button class="btn btn-light btn-sm" type="submit"><i class="fa fa-sign-out"></i> &nbsp; Logout</button>
+    </form>
 
-    <c:forEach items="${list}" var="usr" varStatus="idx">
+    <p>
+        ${error}
+    </p>
+    <form action="/user/add" method="get">
+        <button class="btn btn-success btn-sm" type="submit"><i class="fa fa-user-plus"></i> &nbsp; Add user</button>
+    </form>
+
+    <table class="table table-stripped table-bordered">
+        <thead>
         <tr>
-            <td><c:out value="${usr.username}"/></td>
-            <td><c:out value="${usr.name}"/></td>
-            <td>
-                <c:if test="${username!=usr.username}">
-                    <form action="/edituser" method="get">
-                        <input type="hidden" name="id" value="${usr.id}">
-                        <input type="hidden" name="username" value="${usr.username}">
-                        <input type="hidden" name="name" value="${usr.name}">
-                        <button type="submit">edit user</button>
-                    </form>
-                </c:if>
-            </td>
-            <td>
-                <c:if test="${username!=usr.username}">
-                    <form action="/confirmremove" method="get">
-                        <input type="hidden" name="removeuser" value="${usr.username}">
-                        <button type="submit">remove user</button>
-                    </form>
-                </c:if>
-            </td>
+            <th class="py-3">Username</th>
+            <th class="py-3">Name</th>
+            <th class="py-3">Actions</th>
         </tr>
-    </c:forEach>
-</table>
-</body>
+        </thead>
+        <tbody>
+        <c:forEach items="${users}" var="usr" varStatus="idx">
+            <tr>
+                <td class="py-3"><c:out value="${usr.username}"/></td>
+                <td class="py-3"><c:out value="${usr.name}"/></td>
+                <td class="py-3">
+                    <div>
+                        <form style="display: inline;" action="/user/edit" method="get">
+                            <input type="hidden" name="username" value="${usr.username}">
+                            <button class="btn btn-warning btn-sm" type="submit"><i class="fa fa-pencil"></i></button>
+                        </form>
+                        <c:if test="${username!=usr.username}">
+                            <form style="display: inline;" action="/user/confirmremove" method="get">
+                                <input type="hidden" name="removeUser" value="${usr.username}">
+                                <button class="btn btn-danger btn-sm" type="submit"><i class="fa fa-trash"></i></button>
+                            </form>
+                        </c:if>
+                    </div>
+                </td>
+            </tr>
+        </c:forEach>
+        </tbody>
+    </table>
+    </body>
+</div>
 </html>

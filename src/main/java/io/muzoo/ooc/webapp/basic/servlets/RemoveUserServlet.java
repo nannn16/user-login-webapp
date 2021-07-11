@@ -19,6 +19,6 @@ public class RemoveUserServlet extends AbstractRoutableHttpServlet {
 
     @Override
     public String getPattern() {
-        return "/removeuser";
+        return "/user/remove";
     }
 }

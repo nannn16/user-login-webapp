@@ -1,27 +1,21 @@
 package io.muzoo.ooc.webapp.basic.servlets;
 
-import io.muzoo.ooc.webapp.basic.model.User;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class EditUserServlet extends AbstractRoutableHttpServlet {
+public class ChangePasswordServlet extends AbstractRoutableHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(securityService.isAuthorized(request)) {
             String username = request.getParameter("username");
-            User user = securityService.findByUserName(username);
             request.setAttribute("username", username);
-            request.setAttribute("name", user.getName());
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher("/WEB-INF/edituser.jsp");
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("/WEB-INF/password.jsp");
             requestDispatcher.include(request, response);
-            request.getSession().removeAttribute("error");
         } else {
-            request.removeAttribute("error");
             response.sendRedirect("/login");
         }
     }
@@ -30,9 +24,14 @@ public class EditUserServlet extends AbstractRoutableHttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String error = null;
         if(securityService.isAuthorized(request)) {
-            String name = request.getParameter("name");
-            if(name.isEmpty()) {
-                error = "Name cannot be blank.";
+            String password = request.getParameter("password");
+            String confirmPassword = request.getParameter("confirmPassword");
+
+            if(password.isEmpty()) {
+                error = "Password cannot be blank";
+            }
+            else if(!password.equals(confirmPassword)) {
+                error = "The password confirmation does not match.";
             }
 
             if(error != null) {
@@ -40,17 +39,16 @@ public class EditUserServlet extends AbstractRoutableHttpServlet {
             }
             else {
                 try {
-                    securityService.editUser(request);
+                    securityService.changePassword(request);
                     response.sendRedirect("/");
                     return ;
                 } catch (Exception e) {
                     request.getSession().setAttribute("error", e.getMessage());
                 }
             }
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher("/WEB-INF/edituser.jsp");
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("/WEB-INF/password.jsp");
             requestDispatcher.include(request, response);
-        }
-        else {
+        } else {
             request.removeAttribute("error");
             response.sendRedirect("/login");
         }
@@ -58,6 +56,6 @@ public class EditUserServlet extends AbstractRoutableHttpServlet {
 
     @Override
     public String getPattern() {
-        return "/user/edit";
+        return "/user/password";
     }
 }

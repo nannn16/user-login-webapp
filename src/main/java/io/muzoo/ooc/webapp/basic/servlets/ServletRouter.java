@@ -1,7 +1,9 @@
 package io.muzoo.ooc.webapp.basic.servlets;
 
+import io.muzoo.ooc.webapp.basic.security.DatabaseConnectionService;
 import io.muzoo.ooc.webapp.basic.security.SecurityService;
 import io.muzoo.ooc.webapp.basic.security.UserService;
+import io.muzoo.ooc.webapp.basic.security.UserServiceException;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
@@ -20,10 +22,12 @@ public class ServletRouter {
         servletClasses.add(RemoveUserServlet.class);
         servletClasses.add(ConfirmRemoveServlet.class);
         servletClasses.add(EditUserServlet.class);
+        servletClasses.add(ChangePasswordServlet.class);
     }
 
     public void init(Context ctx) {
         UserService userService = new UserService();
+        userService.setDatabaseConnectionService(new DatabaseConnectionService());
         SecurityService securityService = new SecurityService();
         securityService.setUserService(userService);
 

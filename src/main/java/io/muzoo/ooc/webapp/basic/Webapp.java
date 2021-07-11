@@ -4,6 +4,7 @@ import io.muzoo.ooc.webapp.basic.servlets.ServletRouter;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.ErrorPage;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -23,10 +24,14 @@ public class Webapp {
 
             ServletRouter servletRouter = new ServletRouter();
             servletRouter.init(ctx);
+            ErrorPage errorPage = new ErrorPage();
+            errorPage.setErrorCode(404);
+            errorPage.setLocation("/WEB-INF/error404.jsp");
+            ctx.addErrorPage(errorPage);
 
             tomcat.start();
             tomcat.getServer().await();
-        } catch (ServletException | LifecycleException e) {
+        } catch (LifecycleException e) {
             e.printStackTrace();
         }
 

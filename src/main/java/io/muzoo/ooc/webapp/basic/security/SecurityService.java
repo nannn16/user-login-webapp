@@ -1,9 +1,11 @@
 package io.muzoo.ooc.webapp.basic.security;
 
+import io.muzoo.ooc.webapp.basic.model.User;
+import org.mindrot.jbcrypt.BCrypt;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
 
 public class SecurityService {
 
@@ -34,7 +36,7 @@ public class SecurityService {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         User user = userService.findByUsername(username);
-        if (user != null && Objects.equals(user.getPassword(), password)) {
+        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
             HttpSession session = request.getSession();
             session.setAttribute("username", username);
             return true;
@@ -43,36 +45,52 @@ public class SecurityService {
         }
     }
 
-    public boolean addUser(HttpServletRequest request) {
+    public boolean addUser(HttpServletRequest request) throws UserServiceException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        String name = request.getParameter("name");
-        if (!userService.checkIfUserExists(username)) {
-            userService.addUser(username, password, name);
-            return true;
-        }
-        else {
+        String confirmPassword = request.getParameter("confirmPassword");
+        if (!password.equals(confirmPassword)) {
             return false;
+        } else {
+            String name = request.getParameter("name");
+            userService.addUser(username, password, name);
         }
+        return true;
+    }
+
+    public boolean checkIfUserExists(String username) {
+        return userService.checkIfUserExists(username);
+    }
+
+    public User findByUserName(String username) {
+        return userService.findByUsername(username);
     }
 
     public void removeUser(HttpServletRequest request) {
         String username = request.getParameter("removeuser");
         String currentUser = getCurrentUsername(request);
-        if(userService.checkIfUserExists(username) && !username.equals(currentUser)) {
+        if (userService.checkIfUserExists(username) && !username.equals(currentUser)) {
             userService.removeUser(username);
         }
     }
 
-    public void editUser(HttpServletRequest request) {
-        String userID = request.getParameter("id");
-        int id = Integer.parseInt(userID);
-        String oldUsername = request.getParameter("oldUsername");
-        String newUsername = request.getParameter("newUsername");
+    public void editUser(HttpServletRequest request) throws UserServiceException {
+        String username = request.getParameter("username");
         String name = request.getParameter("name");
-        if(userService.checkIfUserExists(oldUsername)) {
-            userService.editUser(oldUsername, newUsername, name, id);
+        if (userService.checkIfUserExists(username)) {
+            userService.editUser(username, name);
         }
+    }
+
+    public List<User> listUsers() {
+        List<User> users = userService.listUsers();
+        return users;
+    }
+
+    public void changePassword(HttpServletRequest request) throws UserServiceException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        userService.changePassword(username, password);
     }
 
 }

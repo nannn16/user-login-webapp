@@ -11,17 +11,25 @@ public class ConfirmRemoveServlet extends AbstractRoutableHttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(securityService.isAuthorized(request)) {
-            String username = request.getParameter("removeuser");
-            request.setAttribute("removeuser", username);
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher("WEB-INF/confirm.jsp");
+            String username = securityService.getCurrentUsername(request);
+            String removeUser = request.getParameter("removeUser");
+            request.setAttribute("removeUser", removeUser);
+            if(username.equals(removeUser)) {
+                String error = "Cannot remove their own account.";
+                request.getSession().setAttribute("error", error);
+                response.sendRedirect("/");
+                return ;
+            }
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("/WEB-INF/confirm.jsp");
             requestDispatcher.include(request, response);
         } else {
+            request.removeAttribute("error");
             response.sendRedirect("/login");
         }
     }
 
     @Override
     public String getPattern() {
-        return "/confirmremove";
+        return "/user/confirmremove";
     }
 }
