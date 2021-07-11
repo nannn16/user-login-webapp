@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServletRouter {
-
+    
     private final List<Class<? extends AbstractRoutableHttpServlet>> servletClasses = new ArrayList<>();
     {
         servletClasses.add(HomeServlet.class);
