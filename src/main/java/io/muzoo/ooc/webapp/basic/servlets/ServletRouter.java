@@ -36,7 +36,7 @@ public class ServletRouter {
                 AbstractRoutableHttpServlet httpServlet = servletClass.getDeclaredConstructor().newInstance();
                 httpServlet.setSecurityService(securityService);
                 Tomcat.addServlet(ctx, servletClass.getSimpleName(), httpServlet);
-                ctx.addServletMapping(httpServlet.getPattern(), servletClass.getSimpleName());
+                ctx.addServletMappingDecoded(httpServlet.getPattern(), servletClass.getSimpleName());
             } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }

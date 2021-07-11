@@ -8,9 +8,9 @@
 <body>
 <div style="text-align: center">
     <h2>Confirm</h2>
-    <h4>Do you want to remove user ${removeuser}?</h4>
+    <h4>Do you want to remove user ${removeUser}?</h4>
     <form action="/user/remove" method="get">
-        <input type="hidden" name="removeUser" value="${removeuser}">
+        <input type="hidden" name="removeUser" value="${removeUser}">
         <button class="btn btn-success btn-sm" type="submit"><i class="fa fa-check"></i> &nbsp; Confirm</button>
     </form>
     <form action="/" method="get">

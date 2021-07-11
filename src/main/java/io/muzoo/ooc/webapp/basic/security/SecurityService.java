@@ -67,7 +67,7 @@ public class SecurityService {
     }
 
     public void removeUser(HttpServletRequest request) {
-        String username = request.getParameter("removeuser");
+        String username = request.getParameter("removeUser");
         String currentUser = getCurrentUsername(request);
         if (userService.checkIfUserExists(username) && !username.equals(currentUser)) {
             userService.removeUser(username);
